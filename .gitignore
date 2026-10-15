@@ -1,0 +1,97 @@
+# ---------------------------------------------------------------------------
+# Trinetra AI - files that must not be committed
+# ---------------------------------------------------------------------------
+
+# --- Python -----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+
+# virtual environments
+.venv/
+venv/
+env/
+ENV/
+.conda/
+
+# test / tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# packaging / build output
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+
+# --- model weights and exports ---------------------------------------------
+# YOLO weights auto-download on first run and re-export on demand; the
+# exported models are large and specific to this machine, so keep them out.
+*.pt
+*.pth
+*.onnx
+*.engine
+*.tflite
+*.mlpackage
+*.torchscript
+*_openvino_model/
+openvino_model/
+yolo11n_openvino_model/
+
+# --- runtime data -----------------------------------------------------------
+# SQLite database, snapshots, recorded clips, event exports, etc.
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+*.jsonl
+
+# --- frontend (React + Vite + TypeScript) -----------------------------------
+node_modules/
+frontend/node_modules/
+frontend/dist/
+dist/
+build/
+.vite/
+node_modules/.vite/
+.vitest-cache/
+frontend/coverage/
+*.tsbuildinfo
+
+# --- secrets and local overrides --------------------------------------------
+.env
+.env.*
+!.env.example
+
+# --- logs -------------------------------------------------------------------
+*.log
+logs/
+
+# --- media clips and recorded output ----------------------------------------
+*.mp4
+*.avi
+*.mkv
+*.mov
+*.webm
+
+# --- editor / OS noise ------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+*.stackdump

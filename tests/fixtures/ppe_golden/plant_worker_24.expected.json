@@ -1,0 +1,27 @@
+{
+  "image": "plant_worker_24.jpg",
+  "detections": [
+    {
+      "class_id": 8,
+      "class_name": "NO-Hardhat",
+      "confidence": 0.495092,
+      "bounding_box": [
+        183.04,
+        129.75,
+        323.13,
+        300.28
+      ]
+    },
+    {
+      "class_id": 9,
+      "class_name": "NO-Mask",
+      "confidence": 0.464793,
+      "bounding_box": [
+        182.43,
+        130.19,
+        323.06,
+        300.52
+      ]
+    }
+  ]
+}

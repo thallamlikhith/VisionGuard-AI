@@ -1,0 +1,3537 @@
+/* ==========================================================================
+   Trinetra AI - light theme
+
+   Every colour lives in a variable below. Components only ever reference the
+   variables, so the whole palette can be re-themed from :root alone.
+
+   Colour policy: red is reserved for alerts and the danger zone. Green is
+   "safe", amber is "watch out" / the editable zone, blue is the accent.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* --- surfaces ------------------------------------------------------- */
+  --bg: #f5f7fa;
+  --panel: #ffffff;
+  --panel-2: #f8fafc;
+  --line: #e3e8ef;
+  --line-strong: #cbd5e1;
+
+  /* --- text ----------------------------------------------------------- */
+  --text: #1b2430;
+  --muted: #6b7789;
+
+  /* --- semantic colours ------------------------------------------------ */
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --safe: #16a34a;
+  --warn: #d97706;
+  --danger: #dc2626;
+  /* occupied but within the limit: vivid orange, between the amber danger
+     area and the red alert. Red is reserved for an active alert. */
+  --occupy: #ea580c;
+  --occupy-text: #c2410c;
+  --occupy-soft: rgba(234, 88, 12, 0.14);
+  /* entry alerts share the red family with dwell, one shade lighter */
+  --entry: #f87171;
+
+  /* --- text on coloured backgrounds ------------------------------------ */
+  --on-accent: #ffffff;
+  --on-danger: #ffffff;
+
+  /* --- readable tints of the semantic colours on a light background ----- */
+  --accent-soft: rgba(37, 99, 235, 0.1);
+  --safe-soft: rgba(22, 163, 74, 0.12);
+  --warn-soft: rgba(217, 119, 6, 0.14);
+  --danger-soft: rgba(220, 38, 38, 0.1);
+  --danger-text: #b91c1c;
+  --warn-text: #b45309;
+
+  /* --- video stage ----------------------------------------------------- */
+  --stage-bg: #0f172a;
+  --stage-hint-bg: rgba(15, 23, 42, 0.82);
+  --zone-fill: rgba(217, 119, 6, 0.12);
+  --zone-fill-alert: rgba(220, 38, 38, 0.12);
+
+  /* --- shape ----------------------------------------------------------- */
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow-sm: 0 1px 2px rgba(27, 36, 48, 0.05);
+  --shadow-md: 0 4px 16px rgba(27, 36, 48, 0.07);
+
+  --font: "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* No outer gap and no document scroll: the app fills the viewport from the
+   very first pixel, so the sidebar starts at the top and there is no band
+   above the shell. Only the main column (.page) scrolls - html, body and
+   #root are locked at viewport height with overscroll disabled, so a
+   touchpad flick or an overscroll past either end cannot move or bounce the
+   page itself (the white band Edge showed while scrolling). Only body used
+   to be reset; html and #root had no rule, so any default margin or padding
+   on them (or a quirks-mode body margin when the stylesheet loads late
+   after a fresh pull) rendered as empty space above everything.
+   overflow: hidden alone still allows PROGRAMMATIC scrolling (scrollIntoView,
+   focus(), setting scrollTop, or a browser-restored offset after reload can
+   shift the locked document upward with no way to scroll back). overflow:
+   clip forbids scrolling entirely - user, programmatic and restored - so the
+   locked containers cannot move at all. The hidden declaration stays first
+   as the fallback for browsers without clip support. */
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  overflow: clip;
+  overscroll-behavior: none;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  overflow: clip;
+  overscroll-behavior: none;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  overflow: clip;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-shell {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  /* the shell is exactly the viewport: 100dvh where supported so a mobile
+     URL bar does not leave a gap, 100vh everywhere else. Nothing inside may
+     grow it (overflow hidden clips programming mistakes instead of handing
+     the document a scrollbar).
+     position: fixed pins the shell to the viewport itself, so even a
+     restored or programmatic document scroll offset cannot shift the sidebar
+     upward: the shell does not move with the document. overflow: clip (with
+     the hidden fallback first) additionally makes the shell unscrollable
+     even programmatically. */
+  position: fixed;
+  inset: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  overflow: clip;
+  align-items: stretch;
+}
+
+.page {
+  flex: 1 1 auto;
+  /* the only scroll container: the top bar scrolls away with the content
+     (a sticky bar would need its own overlap rules on all four pages, so
+     the bar behaves exactly as before, just inside this box). min-height 0
+     lets the column shrink inside the fixed shell instead of forcing it
+     taller; contain keeps a scroll at either end from chaining anywhere.
+     Because every ancestor (html/body/#root/.app-shell) is overflow: clip
+     and the shell is viewport-fixed, a scrollIntoView/focus inside this box
+     scrolls THIS box only - never the document or the shell. */
+  min-height: 0;
+  min-width: 0;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px 28px 48px;
+  width: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* --- top bar ------------------------------------------------------------ */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+.status-pill {
+  flex: 0 0 auto;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid;
+}
+
+.status-pill.idle {
+  color: var(--muted);
+  border-color: var(--line-strong);
+  background: var(--panel-2);
+}
+
+.status-pill.monitoring {
+  color: var(--safe);
+  border-color: var(--safe);
+  background: var(--safe-soft);
+}
+
+/* SAFE and ALERT are the banner's business, never the pill's: the pill says
+   which of the three states the screen is in, so it has no alert look. */
+
+/* --- 4-step stepper ----------------------------------------------------- */
+
+.stepper {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+}
+
+.step {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: var(--shadow-sm);
+}
+
+.step-num {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--panel-2);
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.step-text {
+  min-width: 0;
+}
+
+.step-label {
+  display: block;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.step-hint {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.step.current {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.step.current .step-num {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+/* A finished step is not blocked and must not look it: a green tick says the
+   step is behind us, and the text stays fully readable. */
+.step.done {
+  border-color: var(--safe);
+  background: var(--safe-soft);
+}
+
+.step.done .step-num {
+  border-color: var(--safe);
+  background: var(--safe);
+  color: #fff;
+  font-weight: 700;
+}
+
+.step.done .step-hint {
+  color: var(--safe);
+}
+
+.step-tick {
+  line-height: 1;
+}
+
+.step.blocked {
+  opacity: 0.62;
+}
+
+/* A step that is simply not available yet is not a warning, so it reads as
+   grey like the rest of the dimmed step. Amber is kept for real warnings. */
+.step.blocked .step-hint {
+  color: var(--muted);
+}
+
+@media (max-width: 900px) {
+  .stepper {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* --- the slim bar the stepper collapses to ------------------------------- */
+
+/* Nothing to undo here: the wrapper only exists so "Hide setup" can sit
+   beside the steps without becoming a fourth step. */
+.setup-wrap {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.setup-collapse {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 12px;
+}
+
+.setup-done {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow-sm);
+  font-size: 13px;
+}
+
+.setup-done-tick {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--safe);
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.setup-done-text {
+  flex: 1 1 auto;
+  font-weight: 600;
+}
+
+.setup-edit {
+  flex: 0 0 auto;
+  padding: 2px 0;
+}
+
+/* --- inline message (error or notice, never both at once) --------------- */
+
+.inline-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: var(--shadow-sm);
+  font-size: 13px;
+}
+
+.inline-note.error {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+  color: var(--danger-text);
+}
+
+.inline-note.notice {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* --- layout ------------------------------------------------------------- */
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 20px;
+  align-items: start;
+}
+
+/* grid items default to min-width: auto, which lets the fixed 360px column
+   plus the non-shrinking alert buttons force the whole page wider than the
+   viewport. Every child may shrink; the alert body ellipsis absorbs it. */
+.layout > *,
+.main > * {
+  min-width: 0;
+}
+
+.card {
+  min-width: 0;
+}
+
+@media (max-width: 1080px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.status-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.status-big {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-align: center;
+}
+
+.status-big.off {
+  color: var(--muted);
+  border-color: var(--line-strong);
+  background: var(--panel-2);
+}
+
+.status-big.safe {
+  color: var(--safe);
+  border-color: var(--safe);
+  background: var(--safe-soft);
+}
+
+.status-big.alert {
+  color: var(--on-danger);
+  border-color: var(--danger);
+  background: var(--danger);
+}
+
+.inside-line {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+}
+
+.video-card {
+  padding: 16px;
+}
+
+/* the one line that says what this feed is watching, above the picture */
+.video-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.video-card-head .video-card-title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+
+.video-card-head .machine-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.card h2 {
+  margin: 0 0 14px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.small {
+  font-size: 12px;
+}
+
+/* --- the single alert banner (top of the video card) -------------------- */
+
+.alert-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--danger);
+  color: var(--on-danger);
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.6px;
+}
+
+.alert-banner .alert-text {
+  flex: 1 1 auto;
+}
+
+.alert-banner .detail {
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0;
+  opacity: 0.95;
+}
+
+.mute-toggle {
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: transparent;
+  color: inherit;
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.mute-toggle:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.18);
+  color: inherit;
+}
+
+/* --- video -------------------------------------------------------------- */
+
+/* --- the Paint-style toolbar -------------------------------------------- */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 8px 10px;
+  margin-bottom: 12px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.tool-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.toolbar .tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+
+.toolbar .tool:hover:not(:disabled) {
+  border-color: var(--warn);
+  color: var(--warn-text);
+}
+
+.toolbar .tool.active {
+  background: var(--warn-soft);
+  border-color: var(--warn);
+  color: var(--warn-text);
+  font-weight: 600;
+}
+
+.toolbar .tool:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.tool-icon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.toolbar .freeze-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  /* the words must not break over two lines when the toolbar wraps */
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.toolbar .freeze-toggle input {
+  cursor: pointer;
+  accent-color: var(--warn);
+}
+
+.stage {
+  position: relative;
+  width: 100%;
+  /* the stage is sized to the frame's aspect ratio, so this only shows before
+     the first frame arrives and nothing is letterboxed once it has */
+  background: var(--stage-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  min-height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stage.drawing {
+  cursor: crosshair;
+}
+
+/* the shape tools draw; Select picks and drags instead */
+.stage.drawing.tool-select,
+.stage.tool-select .video.editable {
+  cursor: default;
+}
+
+.stage.drawing.tool-select .overlay .handle-hit {
+  cursor: move;
+}
+
+.video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* contain keeps the whole frame visible; the stage already has the frame's
+     shape, so there is no black strip left over */
+  object-fit: contain;
+  cursor: default;
+  user-select: none;
+}
+
+.video.editable {
+  cursor: crosshair;
+  /* a touch drag must draw, not scroll the page: without this the browser
+   * takes the gesture and the stroke never starts. Scoped to drawing mode,
+   * so scrolling everywhere else is untouched. Pen input arrives as mouse
+   * events and follows the same path. */
+  touch-action: none;
+}
+
+/* the stopped editor's drawing board: dark, the saved layout's shape, with
+   the overlay on top exactly like the live picture */
+.blank-canvas {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 23px, rgba(255, 255, 255, 0.03) 23px 24px),
+    repeating-linear-gradient(90deg, transparent 0 23px, rgba(255, 255, 255, 0.03) 23px 24px),
+    #11151c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.blank-canvas-note {
+  color: var(--muted);
+  font-size: 12px;
+  padding: 4px 10px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+/* The overlay is sized by the picture, not by the viewBox, so a handle keeps
+   its on-screen size however the video is scaled. pointer-events are off on
+   the root so clicks fall through to the picture, and back on for the handles
+   the user actually has to grab. */
+.overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.overlay .zone {
+  fill: var(--zone-fill);
+  stroke: var(--warn);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.overlay .zone.alert {
+  fill: var(--zone-fill-alert);
+  stroke: var(--danger);
+}
+
+/* occupied but within the limit: orange, between the amber idle zone above
+   and the red alert. The class is "occupy" so the three states never share
+   the red that is reserved for an active alert. */
+.overlay .zone.occupy {
+  fill: var(--occupy-soft);
+  stroke: var(--occupy);
+}
+
+/* the shape the Select tool has picked up */
+.overlay .zone.selected {
+  stroke-width: 3;
+  stroke-dasharray: none;
+}
+
+/* the rectangle being dragged out, and the dashed polygon preview */
+.overlay .rubber-band {
+  fill: var(--zone-fill);
+  stroke: var(--warn);
+  stroke-dasharray: 8 6;
+  vector-effect: non-scaling-stroke;
+}
+
+.overlay .zone-preview {
+  fill: none;
+  stroke: var(--warn);
+  stroke-dasharray: 6 6;
+  vector-effect: non-scaling-stroke;
+}
+
+/* --- the label painted inside the top left of the zone ------------------- */
+
+.overlay .zone-tag-bg {
+  fill: var(--warn-soft);
+  stroke: var(--warn);
+  vector-effect: non-scaling-stroke;
+}
+
+.overlay .zone-tag-text {
+  fill: var(--warn-text);
+  font-family: var(--font);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* the tag follows its zone: orange while occupied, red while alerting */
+.overlay .zone-tag.occupy .zone-tag-bg {
+  fill: var(--occupy-soft);
+  stroke: var(--occupy);
+}
+
+.overlay .zone-tag.occupy .zone-tag-text {
+  fill: var(--occupy-text);
+}
+
+.overlay .zone-tag.alert .zone-tag-bg {
+  fill: var(--danger-soft);
+  stroke: var(--danger);
+}
+
+.overlay .zone-tag.alert .zone-tag-text {
+  fill: var(--danger-text);
+}
+
+/* --- handles ------------------------------------------------------------- */
+
+.overlay .handle-hit {
+  fill: transparent;
+  stroke: none;
+  pointer-events: all;
+  cursor: move;
+}
+
+.overlay .handle {
+  fill: var(--panel);
+  stroke: var(--warn);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.overlay .handle.alert,
+.overlay .zone.alert ~ .handle-group .handle {
+  stroke: var(--danger);
+}
+
+.overlay .handle.occupy {
+  stroke: var(--occupy);
+}
+
+.overlay .handle.invalid {
+  stroke: var(--danger);
+  fill: var(--danger);
+}
+
+.overlay .handle.active {
+  fill: var(--accent);
+  stroke: var(--accent);
+}
+
+/* the small "+" that adds a corner on an edge */
+.overlay .midpoint {
+  pointer-events: none;
+}
+
+.overlay .midpoint-hit {
+  fill: transparent;
+  pointer-events: all;
+  cursor: copy;
+}
+
+.overlay .midpoint-dot {
+  fill: var(--warn-soft);
+  stroke: var(--warn);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.overlay .midpoint-plus {
+  fill: var(--warn-text);
+  font-weight: 700;
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+.overlay.locked .handle-hit,
+.overlay.locked .midpoint-hit {
+  pointer-events: none;
+  cursor: default;
+}
+
+.hint {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 80%;
+  text-align: center;
+  background: var(--stage-hint-bg);
+  border: 1px solid var(--line);
+  color: var(--panel);
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+/* --- under the picture: what the colours mean, and what is not watched ---- */
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* The swatch is the box the detector draws, so it is a hollow rectangle in the
+   same three colours the JPEG uses - a filled square would read as the fill of
+   a zone instead. */
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.legend-swatch {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  border-radius: 3px;
+  border: 2px solid currentColor;
+}
+
+.legend-item.safe {
+  color: var(--safe);
+}
+
+.legend-item.warn {
+  color: var(--warn);
+}
+
+.legend-item.occupy {
+  color: var(--occupy);
+}
+
+.legend-item.entry-legend {
+  color: var(--entry);
+}
+
+.legend-item.danger {
+  color: var(--danger);
+}
+
+/* fire/smoke overlay colours, matching the burned-in boxes: scarlet for
+   fire, steel blue for smoke. Neither borrows the green/amber/red verdict
+   colours. */
+.legend-item.fire {
+  color: #ff4500;
+}
+
+.legend-item.smoke {
+  color: #4682b4;
+}
+
+/* PPE violation boxes are magenta on the picture (never an alert colour,
+// grading-only), so the key swatch matches them exactly. */
+.legend-item.ppe {
+  color: #ff00ff;
+}
+
+/* on-video status + confirming chips: small dark pills pinned over the
+   picture, reusing the badge look. The status word follows the banner tones
+   (green/amber/red/grey); confirming stays neutral blue, never an alert. */
+.status-badge,
+.confirming-badge {
+  position: absolute;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.78);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.status-badge {
+  top: 44px;
+  left: 10px;
+  color: #ffffff;
+}
+
+.status-badge.safe {
+  color: #3ddc84;
+}
+
+.status-badge.occupy {
+  color: #ffb020;
+}
+
+.status-badge.alert {
+  color: #ff6b6b;
+}
+
+.status-badge.off {
+  color: #9aa7b8;
+}
+
+.confirming-badge {
+  top: 44px;
+  right: 10px;
+  color: #9ec5ff;
+  letter-spacing: 0;
+  font-weight: 600;
+}
+
+/* camera header card: icon + slot name + machine name + live chip. */
+.camera-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+/* Live Monitor source picker: one compact flex item in the camera header
+ * row (dropdown + upload), with its confirm / hint / progress rows wrapping
+ * onto their own line below. Everything stays inside .video-col, so nothing
+ * can push the page wider at 1280. */
+.source-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  min-width: 0;
+  flex: 1 1 auto;
+  max-width: 460px;
+}
+
+.source-picker-row select {
+  min-width: 0;
+  flex: 1 1 auto;
+  text-overflow: ellipsis;
+}
+
+.source-picker-stack {
+  flex: 1 1 100%;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.source-picker-stack .upload-bar {
+  margin: 0;
+}
+
+.source-picker-stack .confirm-row {
+  margin: 0;
+}
+
+.camera-icon {
+  display: inline-flex;
+  color: var(--muted);
+}
+
+.camera-name {
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+.live-chip {
+  margin-left: auto;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  color: var(--safe);
+  border: 1px solid var(--safe);
+  background: var(--safe-soft);
+}
+
+/* Detection systems panel rows: switch next to its label. Scoped here so
+   every existing form is untouched. */
+.system-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.system-row input {
+  width: auto;
+  margin: 0;
+}
+
+.wall-clock {
+  color: var(--muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* the "confirming possible smoke/fire" note: neutral blue, deliberately not
+   the red/amber of an alert or the orange of an occupied zone. */
+.confirming {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 9px 13px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  color: var(--text);
+  font-size: 13px;
+}
+
+/* A zone corner off screen is not an error - the API refuses such a zone when
+   it is saved - but a camera that changed resolution leaves the saved corners
+   out of the picture, and the part nobody can see is the part not watched.
+   Amber, because the zone is still live on what can be seen. */
+.zone-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 8px 12px;
+  border: 1px solid var(--warn);
+  border-radius: var(--radius-sm);
+  background: var(--warn-soft);
+  color: var(--warn-text);
+  font-size: 12px;
+}
+
+.zone-warning-mark {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--warn);
+  color: #fff;
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1;
+}
+
+/* --- the one primary action for the current step ------------------------ */
+
+/* the one primary action, plus the small stop button beside it */
+.card-primary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.card-primary .primary {
+  flex: 1 1 220px;
+  padding: 12px 18px;
+  font-size: 15px;
+}
+
+.stop-button {
+  flex: 0 0 auto;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.primary-hint {
+  flex: 1 1 100%;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* --- zone chips --------------------------------------------------------- */
+
+.zone-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.zone-chips > li {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.zone-chips > li.active {
+  border-color: var(--accent);
+}
+
+.chip {
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--panel-2);
+}
+
+.zone-chips > li.active .chip {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.chip-remove {
+  border: 0;
+  border-left: 1px solid var(--line);
+  border-radius: 0;
+  padding: 0 10px;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--muted);
+  background: transparent;
+}
+
+.chip-remove:hover:not(:disabled) {
+  background: var(--danger-soft);
+  color: var(--danger-text);
+}
+
+/* --- system status (settings) ------------------------------------------------- */
+
+.system-status {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.system-status-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.system-status-row dd {
+  margin: 0;
+  color: var(--text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- fields ------------------------------------------------------------- */
+
+/* --- detection paths card --------------------------------------------------
+ *  One row per system: icon + title on the left, a proper toggle switch on
+ *  the right, and a target FPS field under the rows that have a cadence.
+ *  The switch is a real checkbox drawn as a track with appearance:none, so
+ *  the global `input { width: 100% }` above cannot stretch it across the
+ *  row (the Phase 1 stretch bug). Scoped to this card, so every existing
+ *  form is untouched. */
+
+.path-row {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.path-row:last-of-type {
+  border-bottom: none;
+}
+
+.path-reset-row {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.path-row-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.path-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.path-title {
+  font-weight: 600;
+  font-size: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.switch {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  cursor: pointer;
+}
+
+.switch input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 40px;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--panel-2);
+  position: relative;
+  cursor: pointer;
+  flex: none;
+}
+
+.switch input:checked {
+  background: var(--safe);
+  border-color: var(--safe);
+}
+
+.switch input::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: left 0.15s ease;
+}
+
+.switch input:checked::after {
+  left: 20px;
+}
+
+.switch input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.switch input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.path-fps {
+  margin-top: 8px;
+  margin-bottom: 0;
+  max-width: 220px;
+}
+
+/* --- detection defaults: slider next to its number ------------------------ */
+
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.slider-row input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.slider-row input[type="number"] {
+  flex: none;
+  width: 90px;
+}
+
+/* --- camera card + videos card -------------------------------------------- */
+
+.resolution-line {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.resolution-line strong {
+  color: var(--text);
+}
+
+.upload-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+
+.upload-button {
+  display: inline-block;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  color: var(--on-accent);
+  border-radius: var(--radius-sm);
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.upload-button:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.upload-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.upload-button input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.delete-icon-btn {
+  padding: 6px 10px;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.field {
+  display: block;
+  margin-bottom: 14px;
+}
+
+.field:last-child {
+  margin-bottom: 0;
+}
+
+.field > span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+/* The one line under a setting that says what it means. `.field > span` already
+   greys and spaces the label, so this only changes the size and the space. */
+.field > span.help {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+/* Live settings save themselves, so the panel says when the backend has them. */
+.applied-line {
+  min-height: 16px;
+  margin: -6px 0 12px;
+  color: var(--safe);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+input,
+select {
+  width: 100%;
+  background: var(--panel);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 9px 11px;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+select {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 17px) 18px, calc(100% - 12px) 18px;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 32px;
+}
+
+input:focus,
+select:focus {
+  outline: 2px solid var(--accent-soft);
+  outline-offset: 0;
+  border-color: var(--accent);
+}
+
+.inside-value {
+  color: var(--accent);
+}
+
+/* --- coordinates, folded away unless asked for ---------------------------- */
+
+.advanced {
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+/* --- the settings form ----------------------------------------------------- */
+
+/* --- a rule the current alert mode ignores ------------------------------ */
+
+/* Dimmed rather than hidden: the number is still the value that comes back when
+   the mode changes, and a field that vanished and returned is disorienting. */
+.field-off > span {
+  color: var(--line-strong);
+}
+
+.field-off .help {
+  color: var(--warn-text);
+}
+
+input:disabled,
+select:disabled {
+  background: var(--panel-2);
+  border-color: var(--line);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.advanced > summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 4px 0;
+}
+
+.advanced > summary:hover {
+  color: var(--warn-text);
+}
+
+.coord-section {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+/* The point list is folded away so picking a zone cannot cover the video: the
+   summary line names the zone, and the numbers are there when they are wanted. */
+.coord-details {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.coord-details > summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 4px 0;
+}
+
+.coord-details > summary:hover {
+  color: var(--warn-text);
+}
+
+.coord-details[open] > summary {
+  margin-bottom: 8px;
+}
+
+
+
+.coord-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 12px;
+}
+
+.coord-table th {
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 0 6px 6px;
+}
+
+.coord-table td {
+  padding: 3px 6px;
+  vertical-align: middle;
+}
+
+.coord-table td input {
+  padding: 7px 9px;
+  font-variant-numeric: tabular-nums;
+}
+
+.coord-table tr.invalid input {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.row-remove {
+  width: 30px;
+  padding: 6px 0;
+  font-size: 15px;
+  line-height: 1;
+}
+
+/* the one-time escape hatch for a zone saved in an earlier session */
+.danger-action {
+  width: 100%;
+  margin-top: 10px;
+  color: var(--danger-text);
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.danger-action:hover:not(:disabled) {
+  background: var(--danger);
+  color: #fff;
+}
+
+.confirm-row {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 11px 12px;
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+}
+
+.confirm-row > span {
+  color: var(--danger-text);
+}
+
+button.wide {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+/* --- control-room shell -------------------------------------------------
+   Three columns: the sections on the left, the work in the middle, the zones
+   on the right. Kept on the existing custom properties so the palette stays
+   in one place and a control room and a wizard would look the same if the
+   layout were ever undone. */
+
+/* (the old .shell grid is gone: the rail + page flexbox above replaces it) */
+
+.main {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-content: start;
+  padding: 18px 12px;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-bg);
+}
+
+.rail {
+  width: 232px;
+  flex: 0 0 auto;
+  /* fixed in place and full height: the shell never scrolls, so sticky is a
+     belt over suspenders, and the rail is not part of the scrolling content
+     (only .page scrolls). 100dvh where supported, 100vh elsewhere. */
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.rail-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 10px 16px;
+}
+
+.rail-brand .brand-mark {
+  width: 34px;
+  height: 34px;
+  font-size: 11px;
+}
+
+.rail-brand-text {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 13.5px;
+  line-height: 1.25;
+}
+
+button.side-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 10px 11px;
+  text-align: left;
+  font-weight: 500;
+  font-size: 13.5px;
+  border-color: transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--sidebar-text);
+}
+
+button.side-item:hover {
+  background: var(--sidebar-bg-2);
+  color: #ffffff;
+}
+
+button.side-item.active {
+  background: var(--sidebar-active);
+  border-color: var(--sidebar-active);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.side-icon {
+  font-size: 14px;
+}
+
+.brand-text {
+  display: grid;
+  gap: 1px;
+}
+
+.brand-sub {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.demo-tag {
+  margin-left: 10px;
+  padding: 3px 7px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--warn-text);
+  border: 1px solid var(--warn);
+  border-radius: 999px;
+  background: var(--warn-soft);
+}
+
+.topbar-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.uptime {
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.status-pill.editing {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* Stopped: the one button, sized to be the obvious thing to press. */
+.start-panel {
+  display: grid;
+  gap: 8px;
+  padding: 34px 20px;
+  text-align: center;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--panel-2);
+}
+
+button.start-button {
+  justify-self: center;
+  padding: 15px 40px;
+  font-size: 17px;
+}
+
+/* One wide banner carries SAFE / ALERT / EDITING. Readable across a room, so
+   the word is set large and the supporting message beneath it. */
+.state-banner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--panel-2);
+}
+
+.state-word {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.state-message {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.state-banner.safe {
+  border-color: var(--safe);
+  background: var(--safe-soft);
+}
+
+.state-banner.safe .state-word {
+  color: var(--safe);
+}
+
+.state-banner.alert {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.state-banner.alert .state-word {
+  color: var(--danger);
+}
+
+.state-banner.alert .state-message {
+  color: var(--danger-text);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.state-banner.occupy {
+  border-color: var(--occupy);
+  background: var(--occupy-soft);
+}
+
+.state-banner.occupy .state-word {
+  color: var(--occupy);
+}
+
+.state-banner.occupy .state-message {
+  color: var(--occupy-text);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.state-banner.editing {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.state-banner.editing .state-word {
+  color: var(--accent);
+}
+
+/* stopped: plain grey, no verdict. It must not borrow the red, orange or
+   green of a verdict it is not making. */
+.state-banner.idle .state-word {
+  color: var(--muted);
+}
+
+/* The two numbers an operator reads mid-shift. */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.tile {
+  display: grid;
+  gap: 3px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--panel-2);
+}
+
+.tile-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.tile-value {
+  font-size: 27px;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* occupied but within the limit (orange); over the limit (red). The old
+   "warn" name is kept as an alias so existing hooks keep working. */
+.tile-value.warn,
+.tile-value.occupy {
+  color: var(--occupy-text);
+}
+
+.tile-value.over {
+  color: var(--danger-text);
+}
+
+.tile-of {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.zone-panel {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.zone-cards {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.zone-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.zone-card.open {
+  border-color: var(--accent);
+}
+
+button.zone-card-open {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 11px 12px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+}
+
+button.zone-card-open:hover {
+  background: var(--panel-2, var(--panel));
+}
+
+/* The card head is a row, so the name, the rename control and the head-count
+   line up on one baseline whether or not a rename box is open. */
+.zone-card-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding-right: 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.zone-card-rename {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 4px 6px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+}
+
+.zone-card-rename-start {
+  flex: 0 0 auto;
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.zone-card-rename-start:hover {
+  border-color: var(--line-strong);
+  color: inherit;
+}
+
+.zone-dot {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+/* Neutral: two or more zones are being monitored and /state cannot say which
+   one raised anything, so every dot says the same honest thing - unknown. */
+.zone-dot.neutral {
+  background: var(--line-strong);
+  box-shadow: inset 0 0 0 1px var(--muted);
+}
+
+.zone-dot.safe {
+  background: var(--safe);
+}
+
+.zone-dot.warn {
+  background: var(--occupy);
+}
+
+.zone-dot.danger {
+  background: var(--danger);
+}
+
+.zone-card-name {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zone-card-count {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* a switched-off zone says so on the card, so it cannot be mistaken for a
+   zone the stopped camera is ignoring. */
+.zone-disabled {
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
+/* A zone's own two figures, each beside the limit it is being read against.
+   These are the numbers the tiles used to speak for as a global total, which
+   made one zone's limit look like it applied to all of them. */
+.zone-card-figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 6px 0 0;
+  padding: 0 12px 10px;
+  font-size: 12px;
+}
+
+.zone-card-figure {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.zone-card-figure dt {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.zone-card-figure dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* Over that zone's own limit - the one case worth interrupting for. */
+.zone-card-figure dd.over {
+  color: var(--warn);
+}
+
+.zone-card-body {
+  display: grid;
+  gap: 10px;
+  padding: 0 12px 12px;
+  border-top: 1px solid var(--line);
+}
+
+/* A zone's own allowance, delay and on/off switch. Kept apart from the
+   machine-wide settings so the two are never read as one number. */
+.zone-rules {
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--panel-2, transparent);
+}
+
+.settings-page {
+  display: grid;
+  gap: 10px;
+}
+
+/* two columns of cards, one column on narrow screens. The right column is
+   wider (5/7) so the uploaded-videos table fits without scrolling. */
+.settings-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.settings-col {
+  display: grid;
+  gap: 16px;
+  align-content: start;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .settings-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* the remove-all-zones card: red heading to match the red button */
+.danger-card {
+  border-color: var(--danger);
+}
+
+.danger-card h2 {
+  color: var(--danger-text);
+}
+
+/* radio choices sit side by side like the seg control */
+.radio-field {
+  border: none;
+  padding: 0;
+  margin: 0 0 14px;
+}
+
+.radio-field:last-child {
+  margin-bottom: 0;
+}
+
+.radio-field legend {
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 6px;
+  padding: 0;
+}
+
+.radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 18px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.radio input {
+  width: auto;
+  accent-color: var(--accent);
+}
+
+.radio-field .help {
+  display: block;
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* online/idle dot in the system status rows: green while live, grey while
+ *  idle. Grey, never red — red is reserved for active alerts. */
+.status-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 7px;
+  background: var(--muted);
+}
+
+.status-dot.on {
+  background: var(--safe);
+}
+
+.status-dot.off {
+  background: var(--muted);
+}
+
+/* inline two-step delete confirm inside the videos table */
+.confirm-inline {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+@media (max-width: 1080px) {
+  .app-shell {
+    flex-direction: column;
+  }
+
+  .rail {
+    width: auto;
+    height: auto;
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    border-right: 0;
+    border-bottom: 1px solid var(--sidebar-bg);
+  }
+
+  .rail-brand {
+    padding-bottom: 2px;
+  }
+}
+
+/* --- buttons ------------------------------------------------------------ */
+
+.button-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+button {
+  background: var(--panel);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 9px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--muted);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+
+button.primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+button.danger {
+  color: var(--danger-text);
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+
+button.link {
+  border-color: transparent;
+  background: transparent;
+  color: var(--accent);
+  padding: 6px 2px;
+}
+
+/* --- uploaded test videos ----------------------------------------------- */
+
+.test-video-tag {
+  margin-left: 10px;
+  padding: 3px 7px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: var(--accent-soft);
+}
+
+/* --- the Source card (shown while the camera is stopped) ---------------- */
+
+.source-card {
+  max-width: 560px;
+  margin: 8px auto;
+  padding: 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+.source-title {
+  margin: 0 0 14px;
+  font-size: 16px;
+}
+
+.seg {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--panel-2);
+}
+
+.seg-item {
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  padding: 7px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.seg-item.active {
+  color: #fff;
+  background: var(--accent);
+}
+
+.source-line {
+  margin: 18px 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.source-line strong {
+  color: var(--text);
+}
+
+.dropzone {
+  margin-top: 16px;
+  padding: 28px 20px;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+  border: 2px dashed var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--panel-2);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.dropzone.dragover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.dropzone-icon {
+  font-size: 26px;
+  color: var(--accent);
+}
+
+.dropzone-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.dropzone-browse {
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.dropzone-browse.disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+  text-decoration: none;
+  pointer-events: none;
+}
+
+.dropzone-browse input {
+  display: none;
+}
+
+.upload-bar {
+  display: grid;
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.upload-bar progress {
+  width: 100%;
+  height: 8px;
+}
+
+.tiles-title {
+  margin: 20px 0 10px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.video-tiles {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.video-tile {
+  position: relative;
+}
+
+.tile-main {
+  width: 100%;
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  padding: 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+}
+
+.video-tile.selected .tile-main {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.tile-name {
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tile-warn {
+  color: var(--warn-text);
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.tile-delete {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 2px 7px;
+  font-size: 12px;
+  line-height: 1.2;
+  border-radius: 999px;
+  color: var(--danger-text);
+  border-color: var(--danger);
+  background: var(--panel);
+}
+
+.confidence-field {
+  display: grid;
+  gap: 6px;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-strong);
+}
+
+.confidence-field > span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.confidence-field > span strong {
+  color: var(--text);
+}
+
+.confidence-field input[type="range"] {
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  accent-color: var(--accent);
+}
+
+/* --- alerts ------------------------------------------------------------- */
+
+.side-badge {
+  margin-left: auto;
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.recent-alerts {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.recent-alerts-head,
+.alerts-page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.recent-alerts-head h3,
+.alerts-page-head h2 {
+  margin: 0;
+}
+
+.recent-alerts-head h3 {
+  font-size: 14px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.link-button {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--accent, #2563eb);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.alerts-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.alert-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.alert-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  min-width: 0;
+}
+
+.alert-row.acked {
+  opacity: 0.6;
+}
+
+.alert-thumb {
+  flex: none;
+  width: 56px;
+  height: 42px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--panel-2);
+}
+
+.alert-thumb.empty {
+  border: 1px dashed var(--line-strong);
+}
+
+.alert-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.alert-kind {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.alert-meta {
+  color: var(--muted);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.alert-ack {
+  flex: none;
+  padding: 6px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.alert-ack-state {
+  flex: none;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.alerts-page .alert-thumb {
+  width: 96px;
+  height: 72px;
+}
+
+.alert-thumb-btn {
+  flex: none;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+.alert-actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.alert-evidence {
+  padding: 6px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* --- evidence modal ----------------------------------------------------- */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.modal-card {
+  width: min(720px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow, 0 18px 50px rgba(0, 0, 0, 0.35));
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.modal-close {
+  padding: 2px 9px;
+  font-size: 18px;
+  line-height: 1.2;
+  border-radius: 999px;
+  border-color: transparent;
+  background: var(--panel-2);
+}
+
+.modal-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+  background: var(--panel-2);
+}
+
+.modal-meta {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ==========================================================================
+   Cement Plant Safety theme (step 1)
+   Dark navy sidebar, light grey page, white rounded cards. Red = alert,
+   green = safe, blue = primary. Existing class names are kept so the layout
+   change never renames a hook the tests or pages rely on.
+   ========================================================================== */
+
+:root {
+  --sidebar-bg: #0f1f3d;
+  --sidebar-bg-2: #16294d;
+  --sidebar-text: #c6d2e7;
+  --sidebar-active: #2f7bff;
+}
+
+/* --- LIVE + FPS overlays on the video ----------------------------------- */
+
+.live-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.78);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.35);
+}
+
+.fps-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.78);
+  color: #e2e8f0;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* full screen toggle on the stage: same dark chip as the badges, bottom
+   right so it never covers the status, fps or confirming chips. */
+.fullscreen-btn {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(15, 23, 42, 0.78);
+  color: #e2e8f0;
+  font-size: 14px;
+  line-height: 1.6;
+  cursor: pointer;
+}
+
+.fullscreen-btn:hover {
+  background: rgba(15, 23, 42, 0.95);
+}
+
+/* in full screen the stage fills the screen; the frame keeps its own shape
+   (letterboxed) so every pointer position still maps through the live
+   bounding rect and zones never shift. */
+.stage:fullscreen {
+  border: none;
+  border-radius: 0;
+  background: #000;
+  min-height: 0;
+}
+
+/* --- zone panel head + enable toggles ------------------------------------ */
+
+.zone-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.zone-panel-head h2 {
+  margin: 0;
+}
+
+.add-zone-btn {
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.add-zone-btn:hover:not(:disabled) {
+  background: var(--accent);
+  color: #fff;
+}
+
+.zone-enable {
+  position: relative;
+  flex: 0 0 auto;
+  display: inline-block;
+  width: 34px;
+  height: 19px;
+  cursor: pointer;
+}
+
+.zone-enable input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.zone-enable-slider {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--line-strong);
+  transition: background 0.15s ease;
+}
+
+.zone-enable-slider::after {
+  content: "";
+  position: absolute;
+  top: 2.5px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition: left 0.15s ease;
+}
+
+.zone-enable input:checked + .zone-enable-slider {
+  background: var(--safe);
+}
+
+.zone-enable input:checked + .zone-enable-slider::after {
+  left: 17px;
+}
+
+.zone-enable input:focus-visible + .zone-enable-slider {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* --- event badges (Alerts / History) ------------------------------------- */
+
+.event-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.event-badge.badge-dwell {
+  color: #fff;
+  background: var(--danger);
+}
+
+.event-badge.badge-entry {
+  color: #fff;
+  background: var(--danger);
+}
+
+.event-badge.badge-capacity {
+  color: var(--warn-text);
+  background: var(--warn-soft);
+  border: 1px solid var(--warn);
+}
+
+.event-badge.badge-zone-entry {
+  color: #fff;
+  background: var(--accent);
+}
+
+.event-badge.badge-zone-exit {
+  color: var(--muted);
+  background: var(--panel-2);
+  border: 1px solid var(--line-strong);
+}
+
+.event-badge.badge-fire {
+  color: #fff;
+  background: #ff4500;
+}
+
+.event-badge.badge-smoke {
+  color: #fff;
+  background: #4682b4;
+}
+
+.event-badge.badge-other {
+  color: var(--muted);
+  background: var(--panel-2);
+  border: 1px solid var(--line-strong);
+}
+
+.alert-duration {
+  flex: none;
+  font-size: 20px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--danger);
+}
+
+.alert-row.acked .alert-duration {
+  color: var(--muted);
+}
+
+/* the greyed-out acknowledged row says when it was cleared */
+.alert-acked-line {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* empty tabs: a green check for a quiet board */
+.alerts-empty {
+  margin: 0;
+  padding: 18px 12px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.alerts-empty-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--safe);
+  color: #fff;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+/* acknowledge-all sits above the active list */
+.alerts-actions-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+/* thumbnails: grey while loading, an icon when the load fails */
+.alert-thumb.loading {
+  background: var(--panel-2);
+  border: none;
+  animation: thumb-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes thumb-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.alert-thumb.thumb-hidden {
+  display: none;
+}
+
+.alert-thumb.failed {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--muted);
+  border: 1px dashed var(--line-strong);
+  background: var(--panel-2);
+}
+
+/* evidence modal: step through the alerts of the open tab */
+.modal-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+button.danger-btn {
+  color: #fff;
+  background: var(--danger);
+  border-color: var(--danger);
+  font-weight: 600;
+}
+
+button.danger-btn:hover:not(:disabled) {
+  background: #b91c1c;
+  border-color: #b91c1c;
+}
+
+/* --- history table + pagination ------------------------------------------------ */
+
+.history-page {
+  display: grid;
+  gap: 14px;
+}
+
+.history-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+a.button-link {
+  display: inline-block;
+  text-decoration: none;
+  background: var(--panel);
+  border: 1px solid var(--line-strong);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+a.button-link.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+}
+
+.history-table-wrap {
+  overflow-x: auto;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.history-table th {
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 0 8px 8px;
+  white-space: nowrap;
+}
+
+.history-table td {
+  padding: 8px;
+  border-top: 1px solid var(--line);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/* alerts tables: same grid language as the history table, with the row
+   components (thumbnails, badges, action buttons) carried over unchanged. */
+.alert-table-wrap {
+  overflow-x: auto;
+}
+
+.alert-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.alert-table th {
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 0 8px 8px;
+  white-space: nowrap;
+}
+
+.alert-table td {
+  padding: 8px;
+  border-top: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+/* table rows opt out of the old card-row look: the grid carries the shape. */
+.alert-table tr.alert-row {
+  display: table-row;
+  border: none;
+  border-radius: 0;
+  background: none;
+  padding: 0;
+}
+
+.alert-table .alert-thumb-btn {
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.alert-table .alert-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.fire-subhead,
+.zone-subhead {
+  font-size: 13px;
+  font-weight: 700;
+  margin: 18px 0 8px;
+}
+
+/* evidence modal: key/value details plus the row actions. */
+.modal-details {
+  display: grid;
+  gap: 4px 12px;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.modal-detail-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.modal-detail-row dt {
+  color: var(--muted);
+}
+
+.modal-detail-row dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.modal-image-missing {
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.evidence-icon-btn {
+  padding: 4px 9px;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pagination .page-current {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+
+.pagination .page-gap {
+  color: var(--muted);
+  padding: 0 2px;
+}
+
+/* --- history chart ---------------------------------------------------------- */
+
+.history-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  align-items: end;
+}
+
+.daily-chart-wrap {
+  overflow-x: auto;
+}
+
+.daily-chart {
+  display: block;
+  width: 100%;
+  min-width: 480px;
+  height: auto;
+}
+
+.chart-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.chart-tick,
+.chart-day {
+  fill: var(--muted);
+  font-size: 10px;
+  font-family: var(--font);
+}
+
+.chart-bar-dwell {
+  fill: var(--danger);
+}
+
+.chart-bar-entry {
+  fill: var(--entry);
+}
+
+.chart-bar-capacity {
+  fill: var(--warn);
+}
+
+.chart-bar-fire {
+  fill: #ff4500;
+}
+
+.chart-bar-smoke {
+  fill: #4682b4;
+}
+
+.chart-legend {
+  margin-top: 10px;
+}
+
+.history-chart-card {
+  display: grid;
+  gap: 10px;
+}
+
+/* --- live monitor: video sits on the page, not in a card ------------------ */
+
+.video-col {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  min-width: 0;
+}
+
+.video-col-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.video-col-head .video-card-title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+
+/* --- stopped placeholder --------------------------------------------------- */
+
+.stopped-wrap {
+  display: grid;
+  gap: 14px;
+}
+
+.stopped-stage {
+  min-height: 320px;
+  aspect-ratio: 16 / 9;
+}
+
+.stopped-text {
+  color: #e2e8f0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.stopped-actions {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+}
+
+.stopped-actions .primary {
+  min-width: 220px;
+  padding: 12px 18px;
+  font-size: 15px;
+}
+
+/* --- recent alerts card ------------------------------------------------------ */
+
+.recent-card {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.recent-card-h2 {
+  margin: 0;
+}
+
+/* --- settings camera section ------------------------------------------------- */
+
+.camera-card {
+  display: grid;
+  gap: 14px;
+}
+
+.video-table-wrap {
+  min-width: 0;
+}
+
+.video-table {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  /* fixed layout: the Name column takes whatever is left and truncates, so
+     the table can never push past its card and no sideways scroll appears */
+  table-layout: fixed;
+}
+
+.video-table th {
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 0 6px 8px;
+  white-space: nowrap;
+}
+
+.video-table td {
+  padding: 6px;
+  border-top: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+/* set widths: everything but Name is sized to its content, one line each */
+.video-table th:nth-child(2),
+.video-table td:nth-child(2) {
+  width: 64px;
+}
+
+.video-table th:nth-child(3),
+.video-table td:nth-child(3) {
+  width: 88px;
+}
+
+.video-table th:nth-child(4),
+.video-table td:nth-child(4) {
+  width: 62px;
+}
+
+.video-table th:nth-child(5),
+.video-table td:nth-child(5) {
+  width: 74px;
+}
+
+.video-table th:nth-child(6),
+.video-table td:nth-child(6) {
+  width: 88px;
+}
+
+.video-table td:nth-child(n + 2) {
+  white-space: nowrap;
+}
+
+.video-table tr.selected-row td {
+  background: var(--accent-soft);
+}
+
+.video-name {
+  display: block;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.in-use-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--safe-soft);
+  color: var(--safe);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* the delete confirm pair wraps inside its fixed column instead of pushing out */
+.video-table .confirm-inline {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 900px) {
+  /* one column: each video becomes a stacked card, still no sideways scroll */
+  .video-table thead {
+    display: none;
+  }
+
+  .video-table,
+  .video-table tbody {
+    display: block;
+  }
+
+  .video-table tr {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    justify-content: start;
+    gap: 2px 14px;
+    border-top: 1px solid var(--line);
+    padding: 8px 0;
+  }
+
+  .video-table tr:first-child {
+    border-top: none;
+  }
+
+  .video-table td {
+    border-top: none;
+    padding: 2px 0;
+  }
+
+  .video-table td:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .video-table td:nth-child(n + 2) {
+    width: auto;
+  }
+}
+
+.use-btn {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--on-accent);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.use-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  filter: brightness(1.08);
+}
+
+.delete-btn {
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--danger-text);
+  border-color: var(--danger);
+  background: transparent;
+}
+
+.delete-btn:hover:not(:disabled) {
+  background: var(--danger-soft);
+  color: var(--danger-text);
+  border-color: var(--danger);
+}
+
+/* --- corner drafting ----------------------------------------------------- */
+
+.quad-hint {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.overlay .draft-point {
+  fill: var(--panel);
+  stroke: var(--warn);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.overlay .draft-point.first {
+  fill: var(--warn-soft);
+  stroke: var(--warn);
+  stroke-width: 2.5;
+}

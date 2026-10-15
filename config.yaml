@@ -1,0 +1,198 @@
+# Trinetra AI - configuration
+#
+# There is NO default danger zone. An empty list means the machine has not
+# been set up yet: people are still boxed on screen, but nothing alerts until
+# a zone is drawn.
+#
+# Draw the zone in the web UI (start the app, open the dashboard and use the
+# Box / Polygon / Circle tools). It is saved in SQLite and this file is only
+# the fallback for a machine with no stored zone.
+#
+# You can also write the points here by hand, as a POLYGON in PIXEL
+# coordinates of the video frame:
+#
+#   1. run app.py and note the frame size it prints, e.g. "[video] ... 1280x720"
+#   2. open the video in any image viewer, zoom on the machine
+#   3. note the (x, y) pixel coordinates of the machine area corners
+#   4. list them below, at least 3 [x, y] pairs
+#
+# app.py prints a warning if the polygon is larger than the frame.
+
+machine:
+  id: excavator_01
+  name: Excavator 01
+
+hazard:
+  # the danger-zone system as a whole. Off means no zone evaluation, no zone
+  # events and no zone UI; the person tracker still runs while crowd or PPE
+  # need it. On by default, so existing installs behave as before.
+  enabled: true
+
+danger_zone:
+  # which point of the person's bounding box is tested against the polygon
+  #   bottom_center -> middle of the bottom edge, i.e. the worker's feet
+  #   center        -> middle of the box
+  anchor: center
+  # a worker counts as inside only when the anchor is more than this many pixels
+  # inside the boundary, so one standing on the line does not toggle the count.
+  # 0 = plain point-in-polygon test.
+  zone_margin_px: 5
+  # empty until a zone is drawn
+  points: []
+  # Sample zone for a 1280x720 frame, for a fresh clone with no stored zone:
+  # uncomment the four lines below to monitor without drawing one first.
+  # (Pixels, top-left is 0,0. The UI-saved zone in data/trinetra.db wins
+  # over this file whenever one exists.)
+  # points:
+  #   - [400, 200]
+  #   - [700, 200]
+  #   - [760, 500]
+  #   - [350, 500]
+
+rules:
+  # INSTANT -> alert the moment a worker enters the zone
+  # TIMER   -> alert only after the worker stayed dwell_seconds inside
+  # LIMIT   -> alert only when people inside exceed the allowed number
+  mode: TIMER
+  dwell_seconds: 1
+
+detector:
+  # lightweight CPU model, pretrained on COCO. Class 0 = person.
+  # yolo11n.pt is downloaded automatically on first run (~5 MB).
+  model: yolo11n.pt
+  # low on purpose: at 320 the second worker in a busy clip scored 0.11-0.38,
+  # so 0.35 dropped them. 0.25 keeps them and still ignores background noise.
+  confidence: 0.25
+  person_class_id: 0
+  # inference is done at this size, then the boxes are scaled back to the
+  # full frame. 640 catches the small, far-away second worker that 320 missed;
+  # it costs some speed on a CPU but the lower confidence buys it back.
+  imgsz: 640
+  # run YOLO only on every Nth frame and reuse the last tracks in between.
+  # Zone logic and drawing still run on every frame, so the dwell timer and
+  # the picture stay smooth. 1 = every frame (no reuse).
+  detect_every_n: 1
+  # adaptive idle cadence: while somebody is visible YOLO runs on the
+  # detect_every_n schedule above, but an empty scene is only looked at every
+  # Nth frame. 0 (or 1) = off. 3 is a good value: an entry is then seen at
+  # most 2 frames (~80 ms) late, while an empty night shift costs a third of
+  # the inference. The zone clock still ticks on every frame either way.
+  adaptive_idle_n: 3
+  # run detection at this long side (pixels). 0 keeps full size. Default 960.
+  max_detect_long_side: 960
+  # person-track confirmation gate: a raw ByteTrack id is only shown/counted
+  # once it proves itself, by EITHER route below. This is what keeps small
+  # static false persons (a fire extinguisher held a track for 28 frames at
+  # conf 0.25-0.33 without moving) out of the overlay and every count, while
+  # real workers still show on frame 1. Measured values, not guesses: junk
+  # lifetime-max 0.333, real tracks 0.414+, still workers 0.87+.
+  #   person_confirm_conf / person_confirm_frames -> N frames at/above conf
+  #   person_instant_conf   -> one clear frame shows immediately (strictly
+  #     between the must-defer single spike 0.45 and the still worker 0.9)
+  #   person_confirm_move_ratio -> centre moved this fraction of the track's
+  #     own box height (ratio, so near and far cameras behave alike)
+  person_confirm_conf: 0.4
+  person_confirm_frames: 3
+  person_instant_conf: 0.8
+  person_confirm_move_ratio: 0.05
+  # on an Intel CPU this is noticeably faster than PyTorch. The first run
+  # exports yolo11n_openvino_model/ once, next to the .pt weights; if the
+  # openvino package is missing or the export fails, it logs why and falls
+  # back to the .pt weights automatically.
+  openvino: true
+
+runtime:
+  # re-raise an alert for a worker that is still inside after this many
+  # seconds, so a long stay does not produce one event per frame
+  repeat_alert_seconds: 10
+  # draw a semi transparent fill inside the polygon
+  show_zone_fill: true
+
+fire_smoke:
+  # fire/smoke detector copied from DMS (fire_smoke_v2.pt, class order
+  # 0 = smoke, 1 = fire). Off by default so existing installs are unchanged.
+  enabled: false
+  # per-type switches (optional, default to the shared switch above):
+  # either type can run alone, and both off means the model never loads.
+  # fire_enabled: false
+  # smoke_enabled: false
+  model: detector/models/fire_smoke_v2.pt
+  # DMS production operating point — keep exactly (regression report
+  # tests/regression_v2_20261009/report.json).
+  confidence: 0.35
+  imgsz: 640
+  fire_seconds: 1.5
+  smoke_seconds: 2.5
+  # severity split: confidence at or above this reads as the high severity
+  # (RED for fire, ORANGE for smoke), below it as the base severity.
+  high_confidence: 0.8
+  # a FIRE box this far inside a tracked worker is a hi-vis vest, not
+  # flames — dropped before the gate. Smoke is never filtered this way.
+  person_containment: 0.5
+  # Analysis cadence for the fire/smoke side path: frames are analyzed at
+  # most this often, paced by elapsed (wall) time — not by frame count — so
+  # the gate's seconds-to-frames math (ceil(seconds * analysis_fps)) is true
+  # at any video fps. 2.0 Hz is the default operating point.
+  analysis_fps: 2.0
+  # local camera registry file (VISION_CAMERA_FILE env wins when set).
+  camera_file: ""
+  # DMS backend intake (services/vision_alerts.py + services/heartbeat.py).
+  # Empty = local file stubs under data/; set both to POST to a backend.
+  backend_url: ""
+  service_token: ""
+
+crowd:
+  # crowd/person-count side path copied from DMS (crowd_v1.pt, person class
+  # matched case-insensitively). Off by default so existing installs are
+  # unchanged. Annotation only: metrics are reported in /state, never as
+  # ZONE_*/CAPACITY_* events.
+  enabled: false
+  # "reuse" = metrics from the person tracker's boxes (zero extra cost,
+  # the DMS zero-cost route); "model" = dedicated crowd_v1.pt pass paced
+  # by analysis_fps below (the DMS dedicated route).
+  source: reuse
+  model: detector/models/crowd_v1.pt
+  # DMS plan default for the dedicated crowd pass.
+  confidence: 0.35
+  imgsz: 640
+  # model-route cadence, paced by elapsed (wall) time like fire/smoke.
+  analysis_fps: 2.0
+
+ppe:
+  # PPE side path (ppe_v1.pt, 14 classes). Off by default so existing
+  # installs are unchanged. Grade only (PPE_EMISSION_DEFERRED = True):
+  # the per-frame grade is reported in /state, never emitted and never
+  # turned into ZONE_*/CAPACITY_* events.
+  enabled: false
+  model: detector/models/ppe_v1.pt
+  # PPE operating point, measured on the test clips (Oct 2026): conf 0.15
+  # catches the flickering NO-Hardhat frames that 0.25 drops (down to 0.16),
+  # and imgsz 960 catches the frames 640 misses entirely, with zero extra
+  # violation boxes on the other clips. Costs ~2x inference time (~0.5 s at
+  # 640, ~0.5-0.8 s at 960 warmed), absorbed by the async worker.
+  confidence: 0.15
+  iou: 0.45
+  imgsz: 960
+  # test-time augmentation (flips + multi-scale): lifts borderline
+  # detections (a 0.17 vest reads 0.2+) with zero measured false positives,
+  # at ~3x inference cost, absorbed by the async worker. Off loads faster.
+  tta: true
+  # how long a seen violation class keeps counting after its last
+  # sighting, so flickering NO-* reads steadily instead of blinking.
+  # Bounded: a spurious box shows at most this long.
+  memory_seconds: 4.0
+  # grading boundaries (violation ratio = violations / persons).
+  grading:
+    medium_ratio: 0.25
+    high_ratio: 0.5
+    critical_ratio: 1.0
+  # own cadence, paced by elapsed (wall) time and staggered against the
+  # fire/smoke and crowd-model analyses so at most one heavy analysis
+  # runs on any single frame (priority: fire/smoke, crowd, PPE).
+  analysis_fps: 1.0
+
+limits:
+  # upload + history caps. Missing keys fall back to these values.
+  max_upload_size_mb: 500
+  max_videos: 10
+  history_days: 14

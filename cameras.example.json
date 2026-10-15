@@ -1,0 +1,1 @@
+{"cameras": [{"analysis_fps": 2.0, "code": "CAM-1", "detectors": ["FIRE_SMOKE"], "id": "cam-1", "name": "Yard camera", "video_path": "data/videos/clip.mp4"}]}

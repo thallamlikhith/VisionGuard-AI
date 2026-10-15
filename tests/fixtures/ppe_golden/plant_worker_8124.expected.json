@@ -1,0 +1,27 @@
+{
+  "image": "plant_worker_8124.jpg",
+  "detections": [
+    {
+      "class_id": 13,
+      "class_name": "Safety Vest",
+      "confidence": 0.709413,
+      "bounding_box": [
+        112.34,
+        516.31,
+        190.65,
+        687.76
+      ]
+    },
+    {
+      "class_id": 13,
+      "class_name": "Safety Vest",
+      "confidence": 0.610804,
+      "bounding_box": [
+        232.44,
+        503.37,
+        320.14,
+        671.73
+      ]
+    }
+  ]
+}

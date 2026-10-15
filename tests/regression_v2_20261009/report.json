@@ -1,0 +1,154 @@
+{
+ "model": "fire_smoke_v2.pt",
+ "date": "2026-10-09",
+ "operating_point": {
+  "conf": 0.35,
+  "imgsz": 640,
+  "fire_seconds": 1.5,
+  "smoke_seconds": 2.5
+ },
+ "videos": [
+  {
+   "folder": "orange",
+   "video": "Cars_passing_orange_lit_building_20261009120454.mp4",
+   "expected": "NONE",
+   "fire_2fps": null,
+   "smoke_2fps": null,
+   "fire_5fps": null,
+   "smoke_5fps": null,
+   "result": "PASS"
+  },
+  {
+   "folder": "orange",
+   "video": "Empty_indoor_corridor_CCTV_footage_20261009115953.mp4",
+   "expected": "NONE",
+   "fire_2fps": null,
+   "smoke_2fps": null,
+   "fire_5fps": null,
+   "smoke_5fps": null,
+   "result": "PASS"
+  },
+  {
+   "folder": "orange",
+   "video": "Person_walking_with_orange_jacket_20261009121628.mp4",
+   "expected": "NONE",
+   "fire_2fps": null,
+   "smoke_2fps": null,
+   "fire_5fps": null,
+   "smoke_5fps": null,
+   "result": "PASS"
+  },
+  {
+   "folder": "orange",
+   "video": "Workers_walking_on_factory_floor_20261009120333.mp4",
+   "expected": "NONE",
+   "fire_2fps": null,
+   "smoke_2fps": null,
+   "fire_5fps": null,
+   "smoke_5fps": null,
+   "result": "PASS"
+  },
+  {
+   "folder": "orange",
+   "video": "Workers_walking_past_warehouse_wall_20261009120155.mp4",
+   "expected": "NONE",
+   "fire_2fps": null,
+   "smoke_2fps": null,
+   "fire_5fps": null,
+   "smoke_5fps": null,
+   "result": "PASS"
+  },
+  {
+   "folder": "smoke",
+   "video": "Fire_burning_in_industrial_yard_20261009130200.mp4",
+   "expected": "FIRE",
+   "fire_2fps": 1.0,
+   "smoke_2fps": null,
+   "fire_5fps": 1.46,
+   "smoke_5fps": null,
+   "result": "PASS"
+  },
+  {
+   "folder": "smoke",
+   "video": "Fire_burning_in_waste_bin_20261009130018.mp4",
+   "expected": "FIRE",
+   "fire_2fps": 1.0,
+   "smoke_2fps": null,
+   "fire_5fps": 1.46,
+   "smoke_5fps": null,
+   "result": "PASS"
+  },
+  {
+   "folder": "smoke",
+   "video": "Smoke_rising_behind_cardboard_boxes_20261009130315.mp4",
+   "expected": "SMOKE",
+   "fire_2fps": null,
+   "smoke_2fps": null,
+   "fire_5fps": null,
+   "smoke_5fps": null,
+   "result": "MISS"
+  },
+  {
+   "folder": "smoke",
+   "video": "Smoke_rising_in_parking_lot_20261009125826.mp4",
+   "expected": "SMOKE",
+   "fire_2fps": null,
+   "smoke_2fps": 2.5,
+   "fire_5fps": null,
+   "smoke_5fps": 3.75,
+   "result": "PASS"
+  },
+  {
+   "folder": "smoke",
+   "video": "Smoke_rising_in_parking_lot_20261009130400.mp4",
+   "expected": "SMOKE",
+   "fire_2fps": null,
+   "smoke_2fps": 2.5,
+   "fire_5fps": null,
+   "smoke_5fps": 2.71,
+   "result": "PASS"
+  },
+  {
+   "folder": "smoke",
+   "video": "Smoke_rising_in_warehouse_corner_20261009125643.mp4",
+   "expected": "SMOKE",
+   "fire_2fps": null,
+   "smoke_2fps": 6.5,
+   "fire_5fps": null,
+   "smoke_5fps": 6.88,
+   "result": "PASS"
+  },
+  {
+   "folder": "smoke",
+   "video": "Steam_venting_from_kitchen_20261009130204.mp4",
+   "expected": "NONE",
+   "fire_2fps": null,
+   "smoke_2fps": 4.0,
+   "fire_5fps": null,
+   "smoke_5fps": 4.17,
+   "result": "FALSE ALARM"
+  }
+ ],
+ "labeled_benchmark_035": {
+  "fire": {
+   "recall": 0.773,
+   "precision": 1.0,
+   "tp": 92,
+   "fp": 0,
+   "fn": 27
+  },
+  "smoke": {
+   "recall": 0.887,
+   "precision": 0.954,
+   "tp": 125,
+   "fp": 6,
+   "fn": 16
+  }
+ },
+ "totals": {
+  "PASS": 10,
+  "MISS": 1,
+  "FALSE ALARM": 1,
+  "UNKNOWN": 0
+ }
+}

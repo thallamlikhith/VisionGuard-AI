@@ -1,0 +1,16 @@
+{
+  "image": "plant_worker_05.jpg",
+  "detections": [
+    {
+      "class_id": 9,
+      "class_name": "NO-Mask",
+      "confidence": 0.483936,
+      "bounding_box": [
+        182.83,
+        73.15,
+        370.95,
+        265.2
+      ]
+    }
+  ]
+}
